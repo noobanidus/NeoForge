@@ -1,6 +1,15 @@
 --- a/net/minecraft/client/renderer/Sheets.java
 +++ b/net/minecraft/client/renderer/Sheets.java
-@@ -146,11 +_,13 @@
+@@ -96,7 +_,7 @@
+     public static final Material CHEST_LOCATION_LEFT = chestMaterial("normal_left");
+     public static final Material CHEST_LOCATION_RIGHT = chestMaterial("normal_right");
+     public static final Material ENDER_CHEST_LOCATION = chestMaterial("ender");
+-
++    @Nullable protected static java.lang.IllegalStateException TAINT_CAUSE = null;
+     public static RenderType bannerSheet() {
+         return BANNER_SHEET_TYPE;
+     }
+@@ -146,18 +_,22 @@
      }
  
      private static Material createSignMaterial(WoodType p_173386_) {
@@ -16,6 +25,15 @@
      }
  
      public static Material getSignMaterial(WoodType p_173382_) {
++        if (SIGN_MATERIALS.get(p_173382_) == null && TAINT_CAUSE != null) throw TAINT_CAUSE;
+         return SIGN_MATERIALS.get(p_173382_);
+     }
+ 
+     public static Material getHangingSignMaterial(WoodType p_250958_) {
++        if (HANGING_SIGN_MATERIALS.get(p_250958_) == null && TAINT_CAUSE != null) throw TAINT_CAUSE;
+         return HANGING_SIGN_MATERIALS.get(p_250958_);
+     }
+ 
 @@ -209,6 +_,23 @@
              case SINGLE:
              default:
@@ -35,7 +53,7 @@
 +        if (!net.neoforged.fml.ModLoader.hasErrors() && !net.neoforged.neoforge.internal.CommonModLoader.areRegistriesLoaded()) {
 +            com.mojang.logging.LogUtils.getLogger().error(
 +                      "net.minecraft.client.renderer.Sheets loaded too early, modded registry-based materials may not work correctly",
-+                      new IllegalStateException("net.minecraft.client.renderer.Sheets loaded too early")
++                      TAINT_CAUSE = new IllegalStateException("net.minecraft.client.renderer.Sheets loaded too early")
 +            );
          }
      }
