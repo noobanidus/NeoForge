@@ -25,12 +25,12 @@
      }
  
      public static Material getSignMaterial(WoodType p_173382_) {
-+        if (SIGN_MATERIALS.get(p_173382_) == null && TAINT_CAUSE != null) throw TAINT_CAUSE;
++        if (TAINT_CAUSE != null) throw TAINT_CAUSE;
          return SIGN_MATERIALS.get(p_173382_);
      }
  
      public static Material getHangingSignMaterial(WoodType p_250958_) {
-+        if (HANGING_SIGN_MATERIALS.get(p_250958_) == null && TAINT_CAUSE != null) throw TAINT_CAUSE;
++        if (TAINT_CAUSE != null) throw TAINT_CAUSE;
          return HANGING_SIGN_MATERIALS.get(p_250958_);
      }
  
