@@ -1,6 +1,16 @@
 --- a/net/minecraft/client/renderer/Sheets.java
 +++ b/net/minecraft/client/renderer/Sheets.java
-@@ -146,11 +_,13 @@
+@@ -96,7 +_,8 @@
+     public static final Material CHEST_LOCATION_LEFT = chestMaterial("normal_left");
+     public static final Material CHEST_LOCATION_RIGHT = chestMaterial("normal_right");
+     public static final Material ENDER_CHEST_LOCATION = chestMaterial("ender");
+-
++    @Nullable protected static String TAINT_CAUSE = null;
++    protected static final java.util.Set<WoodType> TAINTED_TYPES = new java.util.HashSet<>();
+     public static RenderType bannerSheet() {
+         return BANNER_SHEET_TYPE;
+     }
+@@ -146,18 +_,24 @@
      }
  
      private static Material createSignMaterial(WoodType p_173386_) {
@@ -16,7 +26,18 @@
      }
  
      public static Material getSignMaterial(WoodType p_173382_) {
-@@ -209,6 +_,23 @@
++        Material signMaterial = SIGN_MATERIALS.get(p_173382_);
++        if (signMaterial == null && TAINTED_TYPES.contains(p_173382_)) throw new NullPointerException("Sign material " + p_173382_.name() + " unavailable as net.minecraft.client.renderer.Sheets was loaded before NeoForge registries by " + TAINT_CAUSE);
+         return SIGN_MATERIALS.get(p_173382_);
+     }
+ 
+     public static Material getHangingSignMaterial(WoodType p_250958_) {
++        Material hangingSignMaterial = SIGN_MATERIALS.get(p_250958_);
++        if (hangingSignMaterial == null && TAINTED_TYPES.contains(p_250958_)) throw new NullPointerException("Sign material " + p_250958_.name() + " unavailable as net.minecraft.client.renderer.Sheets was loaded before NeoForge registries by " + TAINT_CAUSE);
+         return HANGING_SIGN_MATERIALS.get(p_250958_);
+     }
+ 
+@@ -209,6 +_,25 @@
              case SINGLE:
              default:
                  return p_110773_;
@@ -27,12 +48,14 @@
 +     * Not threadsafe. Enqueue it in client setup.
 +     */
 +    public static void addWoodType(WoodType woodType) {
++        if (TAINT_CAUSE != null) TAINTED_TYPES.add(woodType);
 +        SIGN_MATERIALS.put(woodType, createSignMaterial(woodType));
 +        HANGING_SIGN_MATERIALS.put(woodType, createHangingSignMaterial(woodType));
 +    }
 +
 +    static {
 +        if (!net.neoforged.fml.ModLoader.hasErrors() && !net.neoforged.neoforge.internal.CommonModLoader.areRegistriesLoaded()) {
++            TAINT_CAUSE = java.lang.Thread.currentThread().getStackTrace()[2].getClassName();
 +            com.mojang.logging.LogUtils.getLogger().error(
 +                      "net.minecraft.client.renderer.Sheets loaded too early, modded registry-based materials may not work correctly",
 +                      new IllegalStateException("net.minecraft.client.renderer.Sheets loaded too early")
